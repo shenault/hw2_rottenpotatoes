@@ -8,9 +8,11 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.get_all_ratings
+    is_must_redirect = false
     
     if (params[:ratings] == nil)
       @ratings = session[:ratings]
+      is_must_redirect = true
     else
       @ratings = params[:ratings]
       session[:ratings] = params[:ratings]
@@ -18,15 +20,20 @@ class MoviesController < ApplicationController
     
     if (params[:sort] == nil)
       @sorted_by = session[:sort]
+      is_must_redirect = true
     else
       @sorted_by = params[:sort]
       session[:sort] = params[:sort]
     end
     
-    if (params[:ratings] == nil)
+    if (is_must_redirect)
+      redirect_to movies_path({:sort => :release_date, :ratings => @ratings})
+    end
+    
+    if (@ratings == nil)
       @movies = Movie.find(:all, :order => @sorted_by)
     else
-      @movies = Movie.find(:all, :order => @sorted_by, :conditions => {:rating => params[:ratings].keys})
+      @movies = Movie.find(:all, :order => @sorted_by, :conditions => {:rating => @ratings.keys})
     end
   end
 
